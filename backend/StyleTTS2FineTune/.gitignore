@@ -1,0 +1,153 @@
+# Current ignore (keeping your existing rule)
+/StyleGuide/StyleTTS2/*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+venv_wsl/
+env/
+ENV/
+.venv/
+.conda/
+
+# IDE and editors
+.vscode/settings.json
+.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Model files and checkpoints (large files)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+
+# Models directory contents (keep structure, ignore weights)
+Models/**/*.pth
+Models/**/*.pt
+Models/**/*.ckpt
+StyleTTS2/Models/**/*.pth
+StyleTTS2/Models/**/*.pt
+
+# Training outputs and logs
+logs/
+outputs/
+runs/
+tensorboard_logs/
+tb_logs/
+wandb/
+checkpoints/
+experiments/
+
+# Data directories (datasets are usually large)
+Data/**/*.wav
+Data/**/*.mp3
+Data/**/*.flac
+StyleTTS2/Data/**/*.wav
+StyleTTS2/Data/**/*.mp3
+
+# Generated audio files
+*.wav
+*.mp3
+*.flac
+*.ogg
+output*.wav
+generated_*.wav
+synthesized_*.wav
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# Fine-tuning specific
+# Keep config templates but ignore actual training configs with paths
+*_config_local.yml
+*_config_personal.yml
+makeDataset/output/
+makeDataset/processed/
+makeDataset/temp/
+
+# Dataset preparation outputs
+makeDataset/**/*.wav
+makeDataset/**/*.txt
+makeDataset/**/*.json
+makeDataset/tools/output/
+makeDataset/tools/processed/
+
+# Cache files
+.cache/
+*.cache
+__pycache__/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# NLTK data
+nltk_data/
+
+# Hugging Face cache
+.cache/huggingface/
+
+# PyTorch specific
+*.pth.tar
+
+# Training artifacts
+loss_plots/
+sample_outputs/
+validation_outputs/
+
+# Personal fine-tuning data
+personal_voice_data/
+my_dataset/
+custom_data/
+
+# Large pretrained models (download separately)
+StyleTTS2/Models/LibriTTS/
+StyleTTS2/Utils/ASR/
+StyleTTS2/Utils/JDC/
+StyleTTS2/Utils/PLBERT/
