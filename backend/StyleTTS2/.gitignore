@@ -1,0 +1,114 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+reference_audio/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+venv_wsl/
+env/
+ENV/
+.venv/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Model files and checkpoints (large files)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+Models/
+models/
+checkpoints/
+logs/
+outputs/
+runs/
+
+# Audio files (generated outputs)
+*.wav
+*.mp3
+*.flac
+*.ogg
+output*.wav
+generated_*.wav
+
+# Data directories
+Data/
+data/
+datasets/
+
+# Reference audio (optional - uncomment if you don't want to track)
+# reference_audio/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyTorch
+*.pth.tar
+
+# Weights & Biases
+wandb/
+
+# TensorBoard logs
+tensorboard_logs/
+tb_logs/
+
+# Cache files
+.cache/
+*.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Environment variables
+.env
+.env.local
+
+# NLTK data (downloaded automatically)
+nltk_data/
+
+# Hugging Face cache
+.cache/huggingface/
+
+# Config files with sensitive info (if any)
+config_local.yml
+secrets.yml
