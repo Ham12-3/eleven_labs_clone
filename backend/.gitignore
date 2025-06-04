@@ -1,0 +1,191 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+venv_wsl/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env.local
+.env.development
+.env.test
+.env.production
+
+# FastAPI specific
+.uvicorn/
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+db.sqlite3
+
+# Logs
+*.log
+logs/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Media files (if not needed in repo)
+media/
+uploads/
+
+# Static files (if generated)
+staticfiles/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Poetry
+poetry.lock
+
+# Alembic (database migrations)
+alembic/versions/*.py
+!alembic/versions/
+alembic.ini
+
+# Redis dump
+dump.rdb
+
+# ===== ADD THESE FOR YOUR STYLETTS2 PROJECT =====
+
+# AI/ML Model files (large files)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.pth.tar
+
+# Audio files (generated outputs)
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+output*.wav
+generated_*.wav
+synthesized_*.wav
+
+# StyleTTS2 specific large directories
+StyleTTS2/Models/**/*.pth
+StyleTTS2/Models/**/*.pt
+StyleTTS2/Utils/ASR/**/*.pth
+StyleTTS2/Utils/JDC/**/*.t7
+StyleTTS2/Utils/PLBERT/**/*.pth
+
+# Training and ML artifacts
+wandb/
+tensorboard_logs/
+tb_logs/
+checkpoints/
+experiments/
+runs/
+loss_plots/
+sample_outputs/
+validation_outputs/
+
+# Large datasets
+Data/**/*.wav
+Data/**/*.mp3
+Data/**/*.flac
+StyleTTS2/Data/
+StyleTTS2FineTune/makeDataset/output/
+StyleTTS2FineTune/makeDataset/processed/
+
+# Cache directories
+.cache/
+*.cache
+nltk_data/
+.cache/huggingface/
+
+# Personal training data
+personal_voice_data/
+my_dataset/
+custom_data/
+reference_audio/**/*.wav
+
+# Config files with local paths
+*_config_local.yml
+*_config_personal.yml
+config_local.yml
+secrets.yml
