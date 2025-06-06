@@ -12,6 +12,8 @@ import librosa
 import click
 import shutil
 import warnings
+import tqdm
+import sys
 warnings.simplefilter('ignore')
 from torch.utils.tensorboard import SummaryWriter
 
@@ -32,7 +34,7 @@ from optimizers import build_optimizer
 
 from accelerate import Accelerator
 
-accelerator = Accelerator()
+accelerator = Accelerator(cpu= True, device_placement=True)
 
 # simple fix for dataparallel that allows access to class attributes
 class MyDataParallel(torch.nn.DataParallel):
@@ -54,6 +56,7 @@ logger.addHandler(handler)
 @click.command()
 @click.option('-p', '--config_path', default='Configs/config_ft.yml', type=str)
 def main(config_path):
+    print("\n Startingg StyleTTS2 finetuning")
     config = yaml.safe_load(open(config_path))
     
     log_dir = config['log_dir']
@@ -82,6 +85,13 @@ def main(config_path):
     root_path = data_params['root_path']
     min_length = data_params['min_length']
     OOD_data = data_params['OOD_data']
+    
+    
+    print(f"Train data path: {train_path}")
+    print(f"Val data path: {val_path}")
+    print(f"Root path: {root_path}")
+    
+    print(f"T")
 
     max_len = config.get('max_len', 200)
     
@@ -92,6 +102,11 @@ def main(config_path):
     optimizer_params = Munch(config['optimizer_params'])
     
     train_list, val_list = get_data_path_list(train_path, val_path)
+    
+    print("Data lists loaded: ")
+    print(f"Training samples: {len(train_list)}")
+    print(f"Validation samples: {len(val_list)}")
+    
     device = accelerator.device
 
     train_dataloader = build_dataloader(train_list,
@@ -246,6 +261,12 @@ def main(config_path):
     model, optimizer, train_dataloader = accelerator.prepare(
         model, optimizer, train_dataloader
     )
+    
+    
+    print("\n Starting Training:")
+    
+    print(f"Epochs: {epochs}, Batch")
+    print(f"Save frequency: {save_freq}")
 
     for epoch in range(start_epoch, epochs):
         running_loss = 0
@@ -261,6 +282,9 @@ def main(config_path):
         model.bert.train()
         model.msd.train()
         model.mpd.train()
+        
+        print(f"\n ------- EPOCH {epoch+1}/{epochs} -------\n")
+        train_iter = tqdm(enumerate(train_dataloader), desc="Training", total=len(train_dataloader), file=sys.stdout,bar_format='{l_bar}{bar:30}{r_bar}')
 
         for i, batch in enumerate(train_dataloader):
             waves = batch[0]

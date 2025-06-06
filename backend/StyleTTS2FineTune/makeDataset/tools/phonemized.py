@@ -2,8 +2,8 @@ import argparse
 from phonemizer import phonemize
 import os
 from tqdm import tqdm
-# from phonemizer.backend.espeak.wrapper import EspeakWrapper                ## For Windows
-# EspeakWrapper.set_library("C:\Program Files\eSpeak NG\libespeak-ng.dll")  ## For Windows
+from phonemizer.backend.espeak.wrapper import EspeakWrapper                ## For Windows
+EspeakWrapper.set_library(r"C:\Program Files\eSpeak NG\libespeak-ng.dll")  ## For Windows
 
 
 # argument parser

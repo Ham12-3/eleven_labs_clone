@@ -60,7 +60,7 @@ output*.wav
 generated_*.wav
 
 # Data directories
-Data/
+
 data/
 datasets/
 

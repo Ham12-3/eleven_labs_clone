@@ -21,5 +21,6 @@ fastapi
 uvicorn
 pydantic
 numpy
+
 boto3
 git+https://github.com/resemble-ai/monotonic_align.git
