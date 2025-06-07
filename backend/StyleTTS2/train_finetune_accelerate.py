@@ -12,9 +12,10 @@ import librosa
 import click
 import shutil
 import warnings
-import tqdm
+from tqdm import tqdm
 import sys
 warnings.simplefilter('ignore')
+
 from torch.utils.tensorboard import SummaryWriter
 
 from meldataset import build_dataloader
@@ -34,7 +35,7 @@ from optimizers import build_optimizer
 
 from accelerate import Accelerator
 
-accelerator = Accelerator(cpu= True, device_placement=True)
+accelerator = Accelerator()
 
 # simple fix for dataparallel that allows access to class attributes
 class MyDataParallel(torch.nn.DataParallel):
@@ -269,6 +270,7 @@ def main(config_path):
     print(f"Save frequency: {save_freq}")
 
     for epoch in range(start_epoch, epochs):
+        start_time = time.time()
         running_loss = 0
         start_time = time.time()
 
@@ -597,6 +599,9 @@ def main(config_path):
         loss_align = 0
         loss_f = 0
         _ = [model[key].eval() for key in model]
+        
+        
+        print("Running validation...")
 
         with torch.no_grad():
             iters_test = 0

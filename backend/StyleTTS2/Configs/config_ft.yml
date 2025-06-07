@@ -1,7 +1,7 @@
 log_dir: "Models/LibriTTS"
 save_freq: 5
 log_interval: 10
-device: "cpu"
+device: "cuda"
 epochs: 75 # number of finetuning epoch (1 hour of data)
 batch_size: 2
 max_len: 225 # maximum number of frames
@@ -25,7 +25,7 @@ preprocess_params:
   sr: 24000
   spect_params:
     n_fft: 2048
-    win_length: 1200
+    win_length: 1200  
     hop_length: 300
 
 model_params:

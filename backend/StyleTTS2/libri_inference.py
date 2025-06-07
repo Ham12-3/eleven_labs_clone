@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
     # Generate speech
     audio = synthesiser.inference(
-        text="Hello, my name is andreas and I am now testing with the new fine tuned model.",
+        text="Hello, my name is Abdul and I am now testing with the new fine tuned model.",
         ref_s=ref_style,
     )
 
