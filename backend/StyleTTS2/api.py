@@ -3,11 +3,20 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 from libri_inference import StyleTTS2Inference
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks , Header, Depends
+from fastapi.security import APIKeyHeader
 
 import os
 import logging
 import re
+import numpy as np
+
+import soundfile as sf
+import boto3
+
+# local environment variable 
+from dotenv import load_dotenv
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)  # Get the actual logger
@@ -15,6 +24,51 @@ logger = logging.getLogger(__name__)  # Get the actual logger
 # Global variables 
 synthesizer = None
 reference_style = None
+
+API_KEY = os.getenv("API_KEY")
+
+
+api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+
+async def verify_api_key(authorization:str = Header(None)):
+    if not authorization:
+        logger.warning("No API key provided")
+        raise HTTPException(status_code=401, detail="API key missing")
+    
+    
+    if authorization.startswith("Bearer"):
+        token = authorization.replace("Bearer ", "")
+        
+    else:
+        token = authorization
+        
+    if token != API_KEY:
+        logger.warning("Invalid API key provided")
+        raise HTTPException(status_code=401, detail="Invlaid API key")
+    
+    return token
+        
+
+
+def get_s3_client():
+    client_kwargs = {'region_name': os.getenv("AWS_REGION", "us-east-1")}
+    
+    
+    if os.getenv("AWS_ACCESS_KEY_ID") and os.getenv("AWS_SECRET_ACCESS_KEY"):
+        client_kwargs.update({
+            'aws_access_key_id': os.getenv("AWS_ACCESS_KEY_ID"),
+            'aws_secret_access_key': os.getenv("AWS_SECRET_ACCESS_KEY")
+        })
+        
+    return boto3.client('s3', **client_kwargs)
+
+
+s3_client = get_s3_client()
+
+S3_PREFIX = os.getenv("S3_PREFIX", "styletts2-outputs")
+S3_BUCKET = os.getenv("S3_BUCKET", "elevenlabs-clone")
+
 
 @asynccontextmanager
 async def lifespan(app:FastAPI): 
@@ -57,6 +111,9 @@ def text_chunker(text,max_chunk_size=125):
     
     
     while current_pos < text_len:
+        if current_pos + max_chunk_size >= text_len:
+            chunks.append(text[current_pos:])
+            break
         chunk_end = current_pos + max_chunk_size
         
         search_text = text[current_pos:chunk_end]
@@ -67,6 +124,7 @@ def text_chunker(text,max_chunk_size=125):
         if sentence_ends:
             last_sentence_end = sentence_ends[-1]
             chunks.append(text[current_pos:current_pos+ last_sentence_end])
+            current_pos += last_sentence_end
             
         else:
             last_space = search_text.rfind(' ')
@@ -75,14 +133,22 @@ def text_chunker(text,max_chunk_size=125):
                 chunks.append(text[current_pos:current_pos + last_space])
                 
                 current_pos += last_space +1
+                
+            else:
+                chunks.append(text[current_pos:chunk_end])
+                current_pos = chunk_end
+        while current_pos < text_len and text[current_pos].isspace():
+            current_pos += 1
+            
+    return chunks
 
 class TextOnlyRequest(BaseModel):
     text: str
     target_voice:str
     
 
-@app.get("/generate")
-async def generate_speech(request: TextOnlyRequest):
+@app.post("/generate", dependencies=[Depends(verify_api_key)])
+async def generate_speech(request: TextOnlyRequest, background_tasks: BackgroundTasks):
     if len(request.text) >5000:
         raise HTTPException(
             
@@ -122,22 +188,66 @@ async def generate_speech(request: TextOnlyRequest):
         
         
         # Split text into manageable chunks 
+        text_chunks = text_chunker(request.text)
+        logger.info(f"Text splt into chunks: {len(text_chunks)}")
         
         
+        audio_segments=[]
         
-        
-    
-    
-  
-        
-
-
-@app.get("/voices")
+        for i, chunk in enumerate(text_chunks):
+            logger.info(f"Processing chunk {i+1}/{len(text_chunks)}")
+            
+            audio_chunk=synthesizer.inference(
+                text=chunk,
+                ref_s=current_style
+                
+            )
+            
+            audio_segments.append(audio_chunk)
+            
+            if i < len(text_chunks) - 1:
+                silence = np.zeros(int(24000 * 0.3))
+                
+                audio_segments.append(silence)
+                
+                if len(audio_segments) > 1:
+                    full_audio = np.concatenate(audio_segments)
+                else:
+                    full_audio = audio_segments[0]
+                    
+                sf.write(local_path, full_audio, 24000)
+                
+                # UPload to S3
+                
+                s3_key =f"{S3_PREFIX}/{output_filename}"
+                s3_client.upload_file(local_path,S3_BUCKET, s3_key)
+                
+                
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params= {'Bucket': S3_BUCKET, 'Key': s3_key},
+                    ExpiresIn=3600  # URL valid for 1 hour
+                )
+                
+                
+                background_tasks.add_task(os.remove, local_path)
+                
+                return {
+                    "audio_url": presigned_url,
+                    "s3_key": s3_key,
+                }
+                
+    except Exception as e:
+        logger.error(f"Failed to generate speech: {e}")
+        raise HTTPException(status_code=500 , detail ="Failed to generate speech")
+            
+ 
+@app.get("/voices" ,dependencies=[Depends(verify_api_key)])
 
 async def list_voices():
     return {"voices": list(TARGET_VOICES.keys())}
 
-@app.get("/health")
+@app.get("/health", dependencies=[Depends(verify_api_key)])
 async def health_check():
     if synthesizer:
         return {"status": "healthy", "model": "loaded"}

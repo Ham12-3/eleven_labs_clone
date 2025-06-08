@@ -18,6 +18,7 @@ phonemizer
 pandas
 tensorboard
 fastapi
+python-dotenv
 uvicorn
 pydantic
 numpy
