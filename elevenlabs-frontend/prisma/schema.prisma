@@ -61,6 +61,7 @@ model User {
     emailVerified DateTime?
     password String
     image         String?
+    credits Int @default(10000)
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
