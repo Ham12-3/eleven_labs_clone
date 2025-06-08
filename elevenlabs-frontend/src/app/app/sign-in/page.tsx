@@ -1,19 +1,17 @@
 "use client";
-import { signUpSchema, type SignUpFormValues } from "@/schemas/auth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { signUp } from "@/actions/auth";
-import { signIn } from "@/server/auth";
 
-export default function SignUpPage() {
+import { signInSchema, type SignInFormValues } from "@/schemas/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+
+export default function SignInPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-
   const router = useRouter();
 
   const {
@@ -21,8 +19,8 @@ export default function SignUpPage() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -31,55 +29,52 @@ export default function SignUpPage() {
   });
 
   const email = watch("email");
-
   const password = watch("password");
 
   useEffect(() => {
     setIsFormValid(!!email && !!password);
   }, [email, password]);
 
-  const onSubmit = async (data: SignUpFormValues) => {
-    setIsLoading(true);
-    setError(null);
+  const onSubmit = async (data: SignInFormValues) => {
+    try {
+      setIsLoading(true);
 
-    const result = await signUp(data);
-
-    if (result?.error) {
-      setError(result.error);
-      setIsLoading(false);
-      return;
-    }
-
-  const signInResult=   await signIn("credentials" , {
-        redirect:false,
+      const signInResult = await signIn("credentials", {
+        redirect: false,
         email: data.email,
         password: data.password,
-    })
+      });
 
-    if(signInResult?.error) {
-        router.push("/app/sign-in");
-        return
+      if (!signInResult?.error) {
+        router.push("/app/speech-synthesis/text-to-speech");
+      } else {
+        setError(
+          signInResult.error === "CredentialsSignin"
+            ? "Invalid email or password"
+            : "Something went wrong",
+        );
+      }
+    } catch (error) {
+      setError("Something went wrong");
+    } finally {
+      setIsLoading(false);
     }
-
-
-    router.push('/app/search-synthesis/text-to-speech')
   };
 
   return (
     <div className="flex min-h-screen w-full">
       <div className="relative w-full lg:w-1/2">
-        <div className="absolute top-6 left-8">
-          <span className="text-jetblack text-xl font-bold tracking-tight">
-            Elevenlabs Clone
+        <div className="absolute left-8 top-6">
+          <span className="text-xl font-bold tracking-tight text-black">
+            12TwelveLabs
           </span>
         </div>
 
-        {/* Centered Sign up form  */}
-
+        {/* Centered sign up form */}
         <div className="flex min-h-screen items-center justify-center">
           <div className="w-full max-w-md p-8">
             <h2 className="mb-6 text-center text-2xl font-semibold">
-              Create your account
+              Log in to your account
             </h2>
 
             {error && (
@@ -88,8 +83,7 @@ export default function SignUpPage() {
               </div>
             )}
 
-            <form action="" onSubmit={handleSubmit(onSubmit)}>
-              {/* Email  */}
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="mb-4">
                 <label
                   htmlFor="email"
@@ -103,7 +97,7 @@ export default function SignUpPage() {
                   {...register("email")}
                   placeholder="Enter your email address"
                   required
-                  className="w-full rounded-lg border border-gray-200 p-2 placeholder:text-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 p-2 placeholder:text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-500">
@@ -112,7 +106,6 @@ export default function SignUpPage() {
                 )}
               </div>
 
-              {/* Password  */}
               <div className="mb-4">
                 <label
                   htmlFor="password"
@@ -126,7 +119,7 @@ export default function SignUpPage() {
                   {...register("password")}
                   placeholder="Enter your password"
                   required
-                  className="w-full rounded-lg border border-gray-200 p-2 placeholder:text-sm focus:border-black focus:ring-1 focus:ring-black focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 p-2 placeholder:text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
                 />
                 {errors.password && (
                   <p className="mt-1 text-xs text-red-500">
@@ -162,22 +155,22 @@ export default function SignUpPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Creating account...
+                    Signing in...
                   </span>
                 ) : (
-                  "Sign up"
+                  "Sign in"
                 )}
               </button>
 
               <div className="text-center">
                 <span className="text-sm text-gray-600">
-                  Already have an account?
-                  <Link
-                    href={"/app/sign-in"}
+                  Don't have an account?{" "}
+                  <a
                     className="font-medium text-black underline"
+                    href="/app/sign-up"
                   >
-                    Sign in
-                  </Link>
+                    Sign up
+                  </a>
                 </span>
               </div>
             </form>
@@ -185,30 +178,27 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* right side  */}
-
+      {/* Right side */}
       <div className="hidden py-[3vh] pr-[3vh] lg:block lg:w-1/2">
         <div className="hidden h-full rounded-3xl bg-gradient-to-b from-indigo-100 via-purple-100 to-[#5960d7] lg:block">
           <div className="flex h-full flex-col p-12">
             <div className="flex h-full items-center justify-center">
-              <Image
-                src="/placeholder.png"
-                alt="Dashboard preview"
+              <img
                 className="w-full rounded-lg"
-                width={500}
-                height={500}
+                alt="Dashboard preview"
+                src="/placeholder.png"
               />
             </div>
 
             <div className="h-fit w-full max-w-lg">
-              <div className="bg-opacity-40 mb-3 flex w-fit rounded-2xl bg-indigo-100 px-3 py-1">
-                <span className="text-xs font-medium tracking-wider text-white uppercase">
-                  latest updates
+              <div className="mb-3 flex w-fit rounded-2xl bg-indigo-100 bg-opacity-40 px-3 py-1">
+                <span className="text-xs font-medium uppercase tracking-wider text-white">
+                  Latest updates
                 </span>
               </div>
               <h3 className="text-lg text-white xl:text-xl 2xl:text-2xl 2xl:leading-10">
                 Use the text-to-speech editor to create voiceovers in multiple
-                voices using AI
+                voices using AI.
               </h3>
             </div>
           </div>
