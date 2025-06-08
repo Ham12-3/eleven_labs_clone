@@ -3,8 +3,9 @@ from uuid import uuid4
 
 from pydantic import BaseModel
 from libri_inference import StyleTTS2Inference
-from fastapi import FastAPI, HTTPException, BackgroundTasks , Header, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Header, Depends
 from fastapi.security import APIKeyHeader
+from fastapi.middleware.cors import CORSMiddleware  # ✅ Add this import
 
 import os
 import logging
@@ -92,6 +93,15 @@ async def lifespan(app:FastAPI):
     logger.info("Shutting down StyleTTS2 API...")
 
 app = FastAPI(title="StyleTTS2 API", lifespan=lifespan)
+
+# ✅ Add CORS middleware - Allow everything
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 TARGET_VOICES = {
     "3" : "reference_audio/reference_audio/3.wav",
