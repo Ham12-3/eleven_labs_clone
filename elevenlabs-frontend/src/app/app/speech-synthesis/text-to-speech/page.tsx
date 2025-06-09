@@ -25,7 +25,7 @@ export default async function TextToSpeechPage() {
 
     const service = "styletts2"
     return (
-        <PageLayout>
+        <PageLayout service={service} showSidebar={true}>
             <h1>Children</h1>
         </PageLayout>
     )
