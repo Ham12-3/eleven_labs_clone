@@ -3,7 +3,8 @@
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import {
   IoChatboxOutline,
   IoMicOutline,
@@ -11,7 +12,6 @@ import {
   IoPersonOutline,
   IoPinOutline,
 } from "react-icons/io5";
-import { isBoxedPrimitive } from "util/types";
 
 export default function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
@@ -40,7 +40,7 @@ export default function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
   }, []);
 
   const handleSignOut = () => {
-    signOut();
+    void signOut();
     setShowAccountMenu(false);
   };
 
