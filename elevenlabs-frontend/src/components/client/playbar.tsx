@@ -104,7 +104,7 @@ export default function Playbar() {
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  return (
+    return (
     <div className="border-t border-gray-200 bg-white p-4">
       <div className="flex items-center space-x-4">
         {/* Track Info */}

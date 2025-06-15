@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signUp } from "@/actions/auth";
-import { signIn } from "@/server/auth";
+import { signIn } from "next-auth/react";
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
@@ -45,24 +45,23 @@ export default function SignUpPage() {
     const result = await signUp(data);
 
     if (result?.error) {
-      setError(result.error);
+      setError(result.error as string);
       setIsLoading(false);
       return;
     }
 
-  const signInResult=   await signIn("credentials" , {
-        redirect:false,
-        email: data.email,
-        password: data.password,
-    })
+    const signInResult = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
 
-    if(signInResult?.error) {
-        router.push("/app/sign-in");
-        return
+    if (signInResult?.error) {
+      router.push("/app/sign-in");
+      return;
     }
 
-
-    router.push('/app/search-synthesis/text-to-speech')
+    router.push('/app/speech-synthesis/text-to-speech');
   };
 
   return (
