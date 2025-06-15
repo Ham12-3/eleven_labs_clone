@@ -1,5 +1,6 @@
 "use server";
 
+import { env } from "@/env";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import type { ServiceType } from "@/types/services";
@@ -58,11 +59,11 @@ export async function generateSpeech({
     const targetVoice = voiceMapping[voice] ?? voice;
 
     // Call the StyleTTS2 API
-    const apiResponse = await fetch(`${process.env.STYLETTS2_API_URL}/generate`, {
+    const apiResponse = await fetch(`${env.STYLETTS2_API_URL}/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.STYLETTS2_API_KEY}`,
+        "Authorization": `Bearer ${env.BACKEND_API_KEY}`,
       },
       body: JSON.stringify({
         text,

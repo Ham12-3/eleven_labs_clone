@@ -11,6 +11,7 @@ import os
 import logging
 import re
 import numpy as np
+import tempfile
 
 import soundfile as sf
 import boto3
@@ -193,42 +194,37 @@ async def generate_speech(request: TextOnlyRequest, background_tasks: Background
         
         audio_id = str(uuid4())
         output_filename = f"{audio_id}.wav"
-        local_path= f"/tmp/{output_filename}"
         
-        
-        
-        # Split text into manageable chunks 
-        text_chunks = text_chunker(request.text)
-        logger.info(f"Text splt into chunks: {len(text_chunks)}")
-        
-        
-        audio_segments=[]
-        
-        for i, chunk in enumerate(text_chunks):
-            logger.info(f"Processing chunk {i+1}/{len(text_chunks)}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            local_path= os.path.join(temp_dir, output_filename)
             
-            audio_chunk=synthesizer.inference(
-                text=chunk,
-                ref_s=current_style
-                
-            )
+            # Split text into manageable chunks 
+            text_chunks = text_chunker(request.text)
+            logger.info(f"Text splt into chunks: {len(text_chunks)}")
             
-            audio_segments.append(audio_chunk)
             
-            if i < len(text_chunks) - 1:
-                silence = np.zeros(int(24000 * 0.3))
+            audio_segments=[]
+            
+            for i, chunk in enumerate(text_chunks):
+                logger.info(f"Processing chunk {i+1}/{len(text_chunks)}")
                 
-                audio_segments.append(silence)
-                
-                if len(audio_segments) > 1:
-                    full_audio = np.concatenate(audio_segments)
-                else:
-                    full_audio = audio_segments[0]
+                audio_chunk=synthesizer.inference(
+                    text=chunk,
+                    ref_s=current_style
                     
+                )
+                
+                audio_segments.append(audio_chunk)
+                
+                if i < len(text_chunks) - 1:
+                    silence = np.zeros(int(24000 * 0.3))
+                    audio_segments.append(silence)
+                    
+            if len(audio_segments) > 0:
+                full_audio = np.concatenate(audio_segments)
                 sf.write(local_path, full_audio, 24000)
                 
                 # UPload to S3
-                
                 s3_key =f"{S3_PREFIX}/{output_filename}"
                 s3_client.upload_file(local_path,S3_BUCKET, s3_key)
                 
@@ -239,14 +235,13 @@ async def generate_speech(request: TextOnlyRequest, background_tasks: Background
                     ExpiresIn=3600  # URL valid for 1 hour
                 )
                 
-                
-                background_tasks.add_task(os.remove, local_path)
-                
                 return {
                     "audio_url": presigned_url,
                     "s3_key": s3_key,
                 }
-                
+            else:
+                raise HTTPException(status_code=500, detail="Audio generation failed, no segments created.")
+
     except Exception as e:
         logger.error(f"Failed to generate speech: {e}")
         raise HTTPException(status_code=500 , detail ="Failed to generate speech")

@@ -1,6 +1,7 @@
 "use client";
 
-import { useVoiceStore } from "@/stores/voice-store";
+import { useAudioStore } from "@/stores/audio-store";
+import { useVoiceStore, type Voice } from "@/stores/voice-store";
 import type { ServiceType } from "@/types/services";
 import { IoDownloadOutline, IoPlay } from "react-icons/io5";
 import { type HistoryItem as HistoryItemType } from "@/lib/history";
@@ -29,8 +30,8 @@ export function HistoryPanel({
       playAudio({
         id: item.id.toString(),
         title: item.title,
-        voice: item.voice,
-        audioUrl: item.audioUrl,
+        voice: item.voice ?? "Unknown",
+        url: item.audioUrl,
         service: item.service,
       });
     }
@@ -68,17 +69,15 @@ export function HistoryPanel({
                 )
                 .reduce((groups: Record<string, typeof historyItems>, item) => {
                   const date = item.date;
-                  if (!groups[date]) {
-                    groups[date] = [];
-                  }
-                  groups[date].push(item);
+                  groups[date] ??= [];
+                  groups[date]?.push(item);
                   return groups;
                 }, {}),
             );
 
             // Show no results found when filtered results are empty
             return filteredGroups.length > 0 ? (
-              filteredGroups.map(([date, items], groupIndex) => (
+              filteredGroups.map(([date, items], _groupIndex) => (
                 <div key={date}>
                   <div className="sticky top-0 z-10 my-2 flex w-full justify-center bg-white py-1">
                     <div className="rounded-full bg-gray-100 px-3 py-1 text-xs">
@@ -128,7 +127,7 @@ function HistoryItem({
   onPlay: (item: HistoryItemType) => void;
 }) {
   const voiceUsed =
-    voices.find((voice) => voice.id === item.voice) || voices[0]!;
+    voices.find((voice) => voice.id === item.voice) ?? voices[0]!;
 
   return (
     <div
